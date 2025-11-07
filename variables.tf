@@ -3,7 +3,7 @@ variable "aws_region" {
 }
 
 variable "cluster_name" {
-  default = "prom-stack-lab" # Novo nome para este lab
+  default = "prom-stack-lab" 
 }
 
 variable "vpc_cidr" {
@@ -18,12 +18,11 @@ variable "private_subnets" {
   default = ["10.0.3.0/24", "10.0.4.0/24"]
 }
 
-# Usado para nomear o Papel IAM do Grafana
 variable "grafana_service_account_name" {
   default = "grafana"
 }
 
-# O namespace onde o Prometheus/Grafana serão instalados
+# namespace
 variable "monitoring_namespace" {
   default = "monitoring"
 }

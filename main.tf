@@ -1,5 +1,4 @@
 # --- 1. REDE (VPC) ---
-# Usa a versão estável 5.1.2 do módulo VPC
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.1.2"
@@ -21,7 +20,6 @@ module "vpc" {
 }
 
 # --- 2. CLUSTER EKS ---
-# Usa a versão estável 20.8.4 do módulo EKS
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.8.4"
@@ -40,7 +38,7 @@ module "eks" {
       min_size     = 1
 
       instance_types = ["t3.small"]
-      capacity_type  = "SPOT" # Mais barato para o lab
+      capacity_type  = "SPOT" 
     }
   }
 
@@ -50,10 +48,7 @@ module "eks" {
   }
 }
 
-# --- 2.1. PERMISSÃO ADMIN NO CLUSTER (O NOVO JEITO) ---
-# (Este é o bloco que você adicionou manualmente no console,
-# agora escrito em código Terraform)
-
+# PERMISSÃO ADMIN NO CLUSTER 
 resource "aws_eks_access_entry" "admin_access" {
   cluster_name  = module.eks.cluster_name
   principal_arn = "arn:aws:iam::083523845001:user/hiagogouveia"
@@ -72,11 +67,9 @@ resource "aws_eks_access_policy_association" "admin_policy" {
   depends_on = [aws_eks_access_entry.admin_access]
 }
 
-# --- 3. PAPEL IAM PARA O GRAFANA (IRSA) ---
-# (Este código já estava correto)
+# IAM PARA O GRAFANA 
 
 data "aws_iam_openid_connect_provider" "eks_oidc" {
-  # Adicionamos o depends_on para evitar a "condição de corrida"
   depends_on = [module.eks]
   url        = "https://${module.eks.oidc_provider}"
 }

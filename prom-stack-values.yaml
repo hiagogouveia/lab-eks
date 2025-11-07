@@ -1,0 +1,28 @@
+# prom-stack-values.yaml
+
+# Parte 1: Configuração do IRSA (que já estava correta)
+grafana:
+  serviceAccount:
+    annotations:
+      # Este é o ARN que seu Terraform criou (correto)
+      eks.amazonaws.com/role-arn: "arn:aws:iam::083523845001:role/grafana-cloudwatch-reader-vxzim07l"
+  
+  # ----------------------------------------------------
+  # PARTE 2: Adiciona o Serviço LoadBalancer
+  # ----------------------------------------------------
+  service:
+    type: LoadBalancer # <-- DIZ AO EKS PARA CRIAR UM NLB NA AWS
+    port: 80 # Expondo na porta 80 (padrão HTTP)
+  # ----------------------------------------------------
+  
+  # Parte 3: Configuração da Fonte de Dados (que já estava correta)
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: CloudWatch
+        type: cloudwatch
+        access: proxy
+        jsonData:
+          authType: "arn"
+          defaultRegion: "us-east-1"
