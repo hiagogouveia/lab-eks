@@ -11,7 +11,7 @@ on:
 env:
   TF_WORKING_DIR: ./
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  TF_BACKEND_BUCKET: hiagogouveia-eks-tfstate-XXXX # <- USE O NOME EXATO DO SEU BUCKET
+  TF_BACKEND_BUCKET: hiagogouveia-eks-tfstate-actual-sailfish
 
 jobs:
   terraform:
