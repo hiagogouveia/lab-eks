@@ -1,0 +1,51 @@
+name: Deploy EKS and Monitoring Stack with Terraform
+
+on:
+  # Dispara o workflow quando houver push na branch 'main'
+  push:
+    branches:
+      - main
+  # Permite que a pipeline seja disparada manualmente no GitHub
+  workflow_dispatch:
+
+env:
+  TF_WORKING_DIR: ./
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  TF_BACKEND_BUCKET: hiagogouveia-eks-tfstate-XXXX # <- USE O NOME EXATO DO SEU BUCKET
+
+jobs:
+  terraform:
+    name: "Terraform Apply"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        # Este passo usa os Secrets que você configurou
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 900 # Pede credenciais temporárias para o job (melhor segurança)
+
+      - name: Terraform Init
+        id: init
+        # Passa as configurações do backend
+        run: terraform init -backend-config="bucket=${{ env.TF_BACKEND_BUCKET }}" -backend-config="dynamodb_table=terraform-locks" -input=false
+
+      - name: Terraform Validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        # Salva o plano em um arquivo para ser usado no Apply
+        run: terraform plan -out=tfplan.out -no-color
+
+      - name: Terraform Apply
+        # O apply só é rodado se o plano for bem-sucedido.
+        run: terraform apply -auto-approve tfplan.out
