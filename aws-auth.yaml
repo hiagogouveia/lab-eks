@@ -1,0 +1,12 @@
+# aws-auth.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapUsers: |
+    - userarn: arn:aws:iam::083523845001:user/hiagogouveia
+      username: admin
+      groups:
+        - system:masters
