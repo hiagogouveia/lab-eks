@@ -5,6 +5,15 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      tf_action:
+        description: 'Terraform Action to run (apply or destroy)'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
 
 env:
   TF_WORKING_DIR: ./
@@ -31,18 +40,30 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }} 
           role-duration-seconds: 900
 
+      # 3. PASSO INIT: Estrutura correta de run:
       - name: Terraform Init
         id: init
-        
         run: terraform init -backend-config="bucket=${{ env.TF_BACKEND_BUCKET }}" -backend-config="dynamodb_table=terraform-locks" -input=false
 
       - name: Terraform Validate
         run: terraform validate -no-color
 
+      # 4. PASSO PLAN (Roda apenas para APPLY)
       - name: Terraform Plan
-        
+        # Só roda o plan se a ação desejada for 'apply'
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.tf_action == 'apply'
         run: terraform plan -out=tfplan.out -no-color
-
+      
+      # 5. PASSO APPLY
       - name: Terraform Apply
-        
+        # Roda Apply se for push (default) OU se a entrada for 'apply'
+        if: github.event_name == 'push' || github.event.inputs.tf_action == 'apply'
         run: terraform apply -auto-approve tfplan.out
+
+      # 6. PASSO DESTROY
+      - name: Terraform Destroy
+        # Roda Destroy SOMENTE se a entrada for 'destroy'
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tf_action == 'destroy'
+        run: |
+          echo "WARNING: Executing full infrastructure destruction."
+          terraform destroy -auto-approve
