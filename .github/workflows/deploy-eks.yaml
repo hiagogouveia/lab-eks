@@ -26,13 +26,12 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Configure AWS Credentials
-        # Este passo usa os Secrets que você configurou
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          role-duration-seconds: 900 # Pede credenciais temporárias para o job (melhor segurança)
+          aws-region: ${{ secrets.AWS_REGION }} 
+          role-duration-seconds: 900
 
       - name: Terraform Init
         id: init
