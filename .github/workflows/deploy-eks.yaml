@@ -33,16 +33,16 @@ jobs:
 
       - name: Terraform Init
         id: init
-        # Passa as configurações do backend
+        
         run: terraform init -backend-config="bucket=${{ env.TF_BACKEND_BUCKET }}" -backend-config="dynamodb_table=terraform-locks" -input=false
 
       - name: Terraform Validate
         run: terraform validate -no-color
 
       - name: Terraform Plan
-        # Salva o plano em um arquivo para ser usado no Apply
+        
         run: terraform plan -out=tfplan.out -no-color
 
       - name: Terraform Apply
-        # O apply só é rodado se o plano for bem-sucedido.
+        
         run: terraform apply -auto-approve tfplan.out
